@@ -1,0 +1,78 @@
+{% extends "layouts/main.html.twig" %}
+
+{% block title %}Comprobante de Pago #REC-{{ payment.id }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 700px;">
+  <div class="d-flex justify-content-between align-items-center mb-3 d-print-none">
+    <a href="{{ base_url }}/payments" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i> Volver a Pagos
+    </a>
+    <button onclick="window.print()" class="btn btn-sm btn-primary">
+      <i class="bi bi-printer me-1"></i> Imprimir Comprobante
+    </button>
+  </div>
+
+  <div class="card shadow-sm border p-4">
+    <div class="text-center pb-3 border-bottom mb-3">
+      <h3 class="fw-bold text-primary mb-1"><i class="bi bi-heart-pulse-fill text-warning me-2"></i>VetMedik</h3>
+      <p class="text-muted small mb-0">Clínica Veterinaria & Atención Médica Integral</p>
+      <div class="badge bg-success text-white fs-6 mt-2">RECIBO DE PAGO #REC-{{ payment.id }}</div>
+    </div>
+
+    <div class="row g-2 mb-3 small">
+      <div class="col-6">
+        <strong>Fecha / Hora:</strong> {{ payment.created_at }}<br>
+        <strong>Método de Pago:</strong> {{ payment.payment_method }}<br>
+        <strong>Atendido por:</strong> {{ user ? (user.name ~ ' ' ~ user.lastname) : 'Recepcionista' }}
+      </div>
+      <div class="col-6 text-end">
+        <strong>Mascota / Paciente:</strong> {{ pacient ? pacient.name : 'N/A' }}<br>
+        <strong>Especie / Raza:</strong> {{ pacient ? (pacient.species ~ ' ' ~ pacient.breed) : '-' }}<br>
+        <strong>Propietario:</strong> {{ pacient ? pacient.owner_name : 'N/A' }} ({{ pacient ? pacient.owner_phone : '-' }})
+      </div>
+    </div>
+
+    <div class="table-responsive mb-3">
+      <table class="table table-sm table-bordered align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Concepto / Procedimiento</th>
+            <th>Veterinario Responsable</th>
+            <th class="text-end">Importe</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <strong>{{ reservation ? reservation.title : 'Servicio Veterinario' }}</strong>
+              {% if reservation and reservation.note %}
+                <div class="small text-muted">{{ reservation.note }}</div>
+              {% endif %}
+            </td>
+            <td>{{ medic ? (medic.name ~ ' ' ~ medic.lastname) : 'Médico de Turno' }}</td>
+            <td class="text-end fw-bold">${{ payment.amount|number_format(2) }}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="table-light">
+            <th colspan="2" class="text-end fs-6">TOTAL PAGADO:</th>
+            <th class="text-end fs-5 text-success">${{ payment.amount|number_format(2) }}</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    {% if payment.notes %}
+      <div class="p-2 bg-light rounded border small mb-3">
+        <strong>Notas / Observaciones:</strong> {{ payment.notes }}
+      </div>
+    {% endif %}
+
+    <div class="text-center pt-3 border-top text-muted small">
+      <p class="mb-0">¡Gracias por confiar la salud de tu mascota a VetMedik!</p>
+      <p class="mb-0" style="font-size: 0.75rem;">Conserva este comprobante para cualquier aclaración de tu cuenta.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

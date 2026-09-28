@@ -1,0 +1,158 @@
+{% extends "layouts/main.html.twig" %}
+
+{% block title %}Pagos por Servicios Veterinarios{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+    <div>
+      <h2 class="h3 mb-0 text-gray-800">Pagos y Cobros de Servicios</h2>
+      <p class="text-muted mb-0">Gestión de ingresos, comprobantes de pago y liquidación de consultas y procedimientos.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ base_url }}/payments/new" class="btn btn-sm btn-success text-white">
+        <i class="bi bi-receipt me-1"></i> Registrar Nuevo Cobro
+      </a>
+      <a href="{{ base_url }}/reports" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-bar-chart-line me-1"></i> Reportes Financieros
+      </a>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-md-4">
+      <div class="card border-0 shadow-sm bg-success text-white">
+        <div class="card-body">
+          <div class="text-white-50 small text-uppercase fw-bold">Total Recaudado en Pagos</div>
+          <div class="fs-4 fw-bold">${{ total_collected|number_format(2, '.', ',') }}</div>
+          <div class="small text-white-50">{{ payments|length }} recibos emitidos</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-6 col-md-4">
+      <div class="card border-0 shadow-sm bg-warning text-dark">
+        <div class="card-body">
+          <div class="text-dark-50 small text-uppercase fw-bold">Citas Pendientes de Cobro</div>
+          <div class="fs-4 fw-bold">{{ pending_reservations|length }}</div>
+          <div class="small">Con saldo pendiente</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if pending_reservations is not empty %}
+    <div class="card shadow-sm border-warning mb-4">
+      <div class="card-header bg-warning-subtle py-2 d-flex justify-content-between align-items-center">
+        <span class="fw-bold text-dark"><i class="bi bi-exclamation-circle me-1"></i> Citas con Saldo Pendiente de Cobro</span>
+        <span class="badge bg-warning text-dark">{{ pending_reservations|length }} pendientes</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Cita #</th>
+                <th>Fecha y Hora</th>
+                <th>Mascota / Paciente</th>
+                <th>Dueño</th>
+                <th>Servicio / Consulta</th>
+                <th>Importe</th>
+                <th class="text-end">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pr in pending_reservations %}
+                {% set pac = pr.getPacient() %}
+                <tr>
+                  <td><span class="badge bg-light text-dark border">#{{ pr.id }}</span></td>
+                  <td><small class="text-muted">{{ pr.date_at }} {{ pr.time_at }}</small></td>
+                  <td class="fw-bold"><i class="bi bi-heart me-1 text-danger"></i>{{ pac ? pac.name : 'N/A' }}</td>
+                  <td>{{ pac ? pac.owner_name : 'N/A' }}</td>
+                  <td>{{ pr.title }}</td>
+                  <td class="fw-bold text-danger">${{ pr.price|number_format(2) }}</td>
+                  <td class="text-end">
+                    <a href="{{ base_url }}/payments/new?reservation_id={{ pr.id }}" class="btn btn-xs btn-success text-white">
+                      <i class="bi bi-cash-stack me-1"></i> Cobrar Ahora
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h6 class="m-0 font-weight-bold text-primary">Historial de Cobros Emitidos</h6>
+      <span class="badge bg-secondary">{{ payments|length }} registros</span>
+    </div>
+    <div class="card-body p-0">
+      {% if payments is empty %}
+        <div class="text-center py-5 text-muted">
+          <i class="bi bi-cash-coin fs-1 d-block mb-2"></i>
+          No hay registros de pagos efectuados todavía.
+        </div>
+      {% else %}
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Recibo #</th>
+                <th>Fecha y Hora</th>
+                <th>Cita #</th>
+                <th>Mascota / Paciente</th>
+                <th>Propietario / Dueño</th>
+                <th>Monto Cobrado</th>
+                <th>Método de Pago</th>
+                <th>Cobrado Por</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in payments %}
+                {% set res = p.getReservation() %}
+                {% set pac = p.getPacient() %}
+                {% set usr = p.getUser() %}
+                <tr>
+                  <td><span class="badge bg-dark">REC-{{ p.id }}</span></td>
+                  <td><small class="text-muted">{{ p.created_at }}</small></td>
+                  <td>
+                    {% if res %}
+                      <a href="{{ base_url }}/reservation/{{ res.id }}/edit" class="text-decoration-none">
+                        #{{ res.id }} - {{ res.title }}
+                      </a>
+                    {% else %}
+                      <span class="text-muted">Cita #{{ p.reservation_id }}</span>
+                    {% endif %}
+                  </td>
+                  <td class="fw-bold"><i class="bi bi-heart me-1 text-danger"></i>{{ pac ? pac.name : 'N/A' }}</td>
+                  <td>{{ pac ? pac.owner_name : 'N/A' }}</td>
+                  <td class="fw-bold text-success fs-6">${{ p.amount|number_format(2) }}</td>
+                  <td>
+                    <span class="badge bg-info text-dark">{{ p.payment_method }}</span>
+                  </td>
+                  <td><small class="text-muted">{{ usr ? (usr.name ~ ' ' ~ usr.lastname) : 'Sistema' }}</small></td>
+                  <td class="text-end">
+                    <a href="{{ base_url }}/payments/receipt/{{ p.id }}" class="btn btn-xs btn-outline-primary" title="Ver Recibo / Imprimir">
+                      <i class="bi bi-printer"></i>
+                    </a>
+                    <form method="POST" action="{{ base_url }}/payments/{{ p.id }}/delete" class="d-inline" onsubmit="return confirm('¿Seguro que deseas eliminar este comprobante de pago?')">
+                      {{ csrf_field() }}
+                      <button type="submit" class="btn btn-xs btn-outline-danger" title="Eliminar">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

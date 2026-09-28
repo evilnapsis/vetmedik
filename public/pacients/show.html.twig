@@ -1,0 +1,144 @@
+﻿{% extends "layouts/main.html.twig" %}
+
+{% block title %}Ficha de Mascota - VetMedik v2{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ base_url }}/pacients">Mascotas</a></li>
+<li class="breadcrumb-item active"><span>Ficha Clínica</span></li>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ base_url }}/pacients" class="text-decoration-none text-body-secondary"><i class="bi bi-arrow-left me-1"></i> Volver a Mascotas</a>
+    <div class="d-flex justify-content-between align-items-center mt-2">
+        <h3 class="fw-bold mb-0">Ficha Clínica de Mascota</h3>
+        <div class="d-flex gap-2">
+            <a href="{{ base_url }}/reservation/new" class="btn btn-sm btn-primary"><i class="bi bi-calendar-plus me-1"></i> + Agendar Cita</a>
+            <a href="{{ base_url }}/pacient/{{ pacient.id }}/edit" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil me-1"></i> Editar Mascota</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <!-- Ficha de la Mascota -->
+        <div class="card p-4 border-0 shadow-sm text-center mb-4">
+            <div class="avatar bg-success bg-opacity-10 text-success rounded-circle mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 36px;">
+                {% if pacient.species|lower == 'felino' or pacient.species|lower == 'gato' %}
+                    <i class="bi bi-github"></i>
+                {% else %}
+                    <i class="bi bi-heart-pulse"></i>
+                {% endif %}
+            </div>
+            <h4 class="fw-bold mb-1">{{ pacient.name }}</h4>
+            <span class="badge bg-primary rounded-pill mb-3">{{ pacient.species ?: 'Canino' }} - {{ pacient.breed ?: 'Mestizo' }}</span>
+
+            <div class="text-start border-top pt-3">
+                <p class="mb-2"><strong>Folio / Chip:</strong> #{{ pacient.no ?: pacient.id }}</p>
+                <p class="mb-2"><strong>Sexo:</strong> {{ pacient.gender == 'm' ? 'Macho' : 'Hembra' }}</p>
+                <p class="mb-2"><strong>Color / Rasgos:</strong> {{ pacient.color ?: 'No especificado' }}</p>
+                <p class="mb-2"><strong>Peso:</strong> {{ pacient.weight ? pacient.weight ~ ' kg' : 'N/A' }}</p>
+                <p class="mb-0"><strong>Fecha Nac.:</strong> {{ pacient.day_of_birth ?: 'N/A' }}</p>
+            </div>
+        </div>
+
+        <!-- Propietario / Tutor -->
+        <div class="card p-4 border-0 shadow-sm mb-4">
+            <h5 class="fw-bold mb-3 text-primary"><i class="bi bi-person-badge me-2"></i> Tutor / Dueño</h5>
+            <div class="mb-2">
+                <strong>Nombre:</strong>
+                <div>{{ pacient.owner_name ?: (pacient.name ~ ' ' ~ pacient.lastname) }}</div>
+            </div>
+            <div class="mb-2">
+                <strong>Teléfono:</strong>
+                <div>{{ pacient.owner_phone ?: (pacient.phone ?: 'N/A') }}</div>
+            </div>
+            <div class="mb-2">
+                <strong>Email:</strong>
+                <div>{{ pacient.owner_email ?: (pacient.email ?: 'N/A') }}</div>
+            </div>
+            <div>
+                <strong>Dirección:</strong>
+                <div>{{ pacient.owner_address ?: (pacient.address ?: 'N/A') }}</div>
+            </div>
+        </div>
+
+        <!-- Antecedentes Clínicos -->
+        <div class="card p-4 border-0 shadow-sm">
+            <h5 class="fw-bold mb-3"><i class="bi bi-journal-medical text-danger me-2"></i> Historial Clínico</h5>
+            <div class="mb-3">
+                <h6 class="fw-semibold text-body-secondary mb-1">Padecimientos / Enfermedades:</h6>
+                <p class="mb-0">{{ pacient.sick ?: 'Ninguna registrada' }}</p>
+            </div>
+            <div class="mb-3">
+                <h6 class="fw-semibold text-body-secondary mb-1">Medicamentos Actuales:</h6>
+                <p class="mb-0">{{ pacient.medicaments ?: 'Ninguno registrado' }}</p>
+            </div>
+            <div>
+                <h6 class="fw-semibold text-body-secondary mb-1">Alergias Conocidas:</h6>
+                <p class="mb-0 text-danger">{{ pacient.alergy ?: 'Ninguna registrada' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-body-tertiary py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2 text-primary"></i> Historial de Consultas Médicas</h5>
+                <span class="badge bg-secondary rounded-pill">{{ reservations|length }} consultas</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0 table-hover">
+                        <thead class="bg-body-tertiary">
+                            <tr>
+                                <th class="ps-3">Motivo / Cita</th>
+                                <th>Veterinario</th>
+                                <th>Fecha y Hora</th>
+                                <th>Costo</th>
+                                <th>Estatus</th>
+                                <th class="text-end pe-3">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reservation in reservations %}
+                            <tr>
+                                <td class="ps-3 fw-semibold">
+                                    {{ reservation.title ?: 'Consulta Médica' }}
+                                    {% if reservation.symtoms %}
+                                        <br><small class="text-muted">{{ reservation.symtoms|slice(0, 45) }}...</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set medic = reservation.getMedic() %}
+                                    {{ medic ? 'Dr(a). ' ~ medic.name ~ ' ' ~ medic.lastname : 'N/A' }}
+                                </td>
+                                <td>{{ reservation.date_at }} {{ reservation.time_at }}</td>
+                                <td class="fw-semibold text-success">${{ reservation.price|number_format(2) }}</td>
+                                <td>
+                                    {% set status = reservation.getStatus() %}
+                                    <span class="badge rounded-pill px-2 py-1 badge-status-{{ reservation.status_id }}">
+                                        {{ status ? status.name : 'Pendiente' }}
+                                    </span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    {% if reservation.payment_id == 1 %}
+                                        <a href="{{ base_url }}/payments/new?reservation_id={{ reservation.id }}" class="btn btn-xs btn-success me-1" title="Cobrar"><i class="bi bi-cash-coin"></i></a>
+                                    {% endif %}
+                                    <a href="{{ base_url }}/reservation/{{ reservation.id }}/pdf" class="btn btn-xs btn-outline-danger me-1" target="_blank" title="PDF"><i class="bi bi-file-pdf"></i></a>
+                                    <a href="{{ base_url }}/reservation/{{ reservation.id }}/edit" class="btn btn-xs btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-body-secondary">Esta mascota aún no tiene consultas registradas.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

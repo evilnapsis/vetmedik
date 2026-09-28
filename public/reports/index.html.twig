@@ -1,0 +1,174 @@
+﻿{% extends "layouts/main.html.twig" %}
+
+{% block title %}Reportes Clínicos y Financieros - VetMedik v2{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><span>Análisis</span></li>
+<li class="breadcrumb-item active"><span>Reportes</span></li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1">Módulo de Reportes Veterinarios</h3>
+        <p class="text-body-secondary mb-0">Filtrado dinámico de consultas, diagnósticos y balance de cobros</p>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+        <h5 class="fw-bold mb-3"><i class="bi bi-funnel text-primary me-2"></i> Filtros de Reporte</h5>
+        <form action="{{ base_url }}/reports" method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label font-weight-bold">Médico Veterinario</label>
+                <select name="medic_id" class="form-select form-select-sm">
+                    <option value="">-- Todos los Veterinarios --</option>
+                    {% for medic in medics %}
+                        <option value="{{ medic.id }}" {{ filters.medic_id == medic.id ? 'selected' : '' }}>Dr(a). {{ medic.name }} {{ medic.lastname }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label font-weight-bold">Mascota / Paciente</label>
+                <select name="pacient_id" class="form-select form-select-sm">
+                    <option value="">-- Todas las Mascotas --</option>
+                    {% for pacient in pacients %}
+                        <option value="{{ pacient.id }}" {{ filters.pacient_id == pacient.id ? 'selected' : '' }}>{{ pacient.name }} ({{ pacient.species ?: 'Mascota' }} - {{ pacient.owner_name }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label font-weight-bold">Estatus Cita</label>
+                <select name="status_id" class="form-select form-select-sm">
+                    <option value="">-- Todos --</option>
+                    {% for status in statuses %}
+                        <option value="{{ status.id }}" {{ filters.status_id == status.id ? 'selected' : '' }}>{{ status.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label font-weight-bold">Desde</label>
+                <input type="date" name="start_date" class="form-control form-control-sm" value="{{ filters.start_at }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label font-weight-bold">Hasta</label>
+                <input type="date" name="end_date" class="form-control form-control-sm" value="{{ filters.finish_at }}">
+            </div>
+            <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+                <a href="{{ base_url }}/reports" class="btn btn-xs btn-outline-secondary px-3">Limpiar Filtros</a>
+                <button type="submit" class="btn btn-xs btn-primary px-4"><i class="bi bi-search me-1"></i> Filtrar Reporte</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tarjetas Resumen Financiero y Operativo -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm p-3 border-start border-primary border-4">
+            <div class="text-body-secondary small fw-bold text-uppercase">Total Consultas</div>
+            <div class="fs-4 fw-bold text-primary">{{ total_count }}</div>
+            <small class="text-muted">Citas en el rango</small>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm p-3 border-start border-info border-4">
+            <div class="text-body-secondary small fw-bold text-uppercase">Atendidas / Realizadas</div>
+            <div class="fs-4 fw-bold text-info">{{ attended_count }}</div>
+            <small class="text-muted">Pacientes atendidos</small>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm p-3 border-start border-success border-4">
+            <div class="text-body-secondary small fw-bold text-uppercase">Cobrado / Ingresos</div>
+            <div class="fs-4 fw-bold text-success">${{ total_revenue|number_format(2) }}</div>
+            <small class="text-muted">Monto liquidado</small>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm p-3 border-start border-warning border-4">
+            <div class="text-body-secondary small fw-bold text-uppercase">Por Cobrar / Pendiente</div>
+            <div class="fs-4 fw-bold text-warning">${{ pending_revenue|number_format(2) }}</div>
+            <small class="text-muted">Monto pendiente</small>
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-body-tertiary py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-file-earmark-text text-primary me-2"></i> Resultados del Reporte</h5>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ base_url }}/reports/csv?medic_id={{ filters.medic_id }}&pacient_id={{ filters.pacient_id }}&status_id={{ filters.status_id }}&start_date={{ filters.start_at }}&end_date={{ filters.finish_at }}" class="btn btn-xs btn-outline-success">
+                <i class="bi bi-filetype-csv me-1"></i> Descargar CSV
+            </a>
+            <a href="{{ base_url }}/reports/pdf?medic_id={{ filters.medic_id }}&pacient_id={{ filters.pacient_id }}&status_id={{ filters.status_id }}&start_at={{ filters.start_at }}&finish_at={{ filters.finish_at }}" target="_blank" class="btn btn-xs btn-outline-danger">
+                <i class="bi bi-file-pdf me-1"></i> Exportar PDF
+            </a>
+            <span class="badge bg-primary rounded-pill px-3 py-1">{{ reservations|length }} Registros</span>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="bg-body-tertiary">
+                    <tr>
+                        <th class="ps-3">Folio</th>
+                        <th>Fecha y Hora</th>
+                        <th>Mascota & Dueño</th>
+                        <th>Médico Veterinario</th>
+                        <th>Motivo / Diagnóstico</th>
+                        <th>Costo</th>
+                        <th>Estatus Cita</th>
+                        <th>Pago</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in reservations %}
+                    <tr>
+                        <td class="ps-3 fw-bold text-muted">#{{ reservation.id }}</td>
+                        <td>{{ reservation.date_at }} {{ reservation.time_at }}</td>
+                        <td>
+                            {% set pacient = reservation.getPacient() %}
+                            {% if pacient %}
+                                <span class="fw-semibold text-primary">{{ pacient.name }}</span>
+                                <small class="text-body-secondary d-block">{{ pacient.species ?: 'Mascota' }} - {{ pacient.owner_name ?: 'Sin tutor' }}</small>
+                            {% else %}
+                                <span class="text-body-secondary">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set medic = reservation.getMedic() %}
+                            {{ medic ? 'Dr(a). ' ~ medic.name ~ ' ' ~ medic.lastname : 'N/A' }}
+                        </td>
+                        <td>
+                            <div class="fw-semibold">{{ reservation.title ?: 'Consulta Médica' }}</div>
+                            {% if reservation.symtoms %}
+                                <small class="text-body-secondary">{{ reservation.symtoms|slice(0, 30) }}...</small>
+                            {% endif %}
+                        </td>
+                        <td class="fw-semibold text-success">${{ reservation.price|number_format(2) }}</td>
+                        <td>
+                            {% set status = reservation.getStatus() %}
+                            <span class="badge rounded-pill px-2 py-1 badge-status-{{ reservation.status_id }}">
+                                {{ status ? status.name : 'Pendiente' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if reservation.payment_id == 2 %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Pagado</span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">Pendiente</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-body-secondary">No se encontraron citas o consultas con los criterios seleccionados.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

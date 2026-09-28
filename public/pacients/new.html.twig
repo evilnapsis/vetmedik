@@ -1,0 +1,117 @@
+{% extends "layouts/main.html.twig" %}
+
+{% block title %}Nueva Mascota / Paciente - VetMedik{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h2 class="h3 mb-0 text-gray-800">Registrar Nueva Mascota</h2>
+      <p class="text-muted mb-0">Ficha médica de la mascota y datos de contacto de su propietario.</p>
+    </div>
+    <a href="{{ base_url }}/pacients" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i> Volver a Mascotas
+    </a>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <form action="{{ base_url }}/pacient/create" method="POST">
+        {{ csrf_field() }}
+
+        <h5 class="fw-bold text-primary mb-3"><i class="bi bi-heart-pulse me-2"></i>Datos de la Mascota</h5>
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Nombre de la Mascota *</label>
+            <input type="text" name="name" class="form-control form-control-sm" required placeholder="Ej: Max, Luna, Toby">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Especie *</label>
+            <select name="species" class="form-select form-select-sm" required>
+              <option value="Canino">Canino (Perro)</option>
+              <option value="Felino">Felino (Gato)</option>
+              <option value="Ave">Ave</option>
+              <option value="Conejo">Conejo</option>
+              <option value="Roedor">Roedor</option>
+              <option value="Reptil">Reptil</option>
+              <option value="Otro">Otro / Exótico</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Raza</label>
+            <input type="text" name="breed" class="form-control form-control-sm" placeholder="Ej: Golden Retriever, Siamés, Mestizo">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Sexo</label>
+            <select name="gender" class="form-select form-select-sm">
+              <option value="Macho">Macho</option>
+              <option value="Hembra">Hembra</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Color / Señas</label>
+            <input type="text" name="color" class="form-control form-control-sm" placeholder="Ej: Café con manchas blancas">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Peso Actual (kg)</label>
+            <input type="number" step="0.1" name="weight" class="form-control form-control-sm" placeholder="Ej: 14.5">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-bold">Fecha Nac. Aprox.</label>
+            <input type="date" name="day_of_birth" class="form-control form-control-sm">
+          </div>
+        </div>
+
+        <h5 class="fw-bold text-success mb-3"><i class="bi bi-person-badge me-2"></i>Datos del Propietario / Dueño</h5>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Nombre del Dueño *</label>
+            <input type="text" name="owner_name" class="form-control form-control-sm" required placeholder="Nombre y apellidos del tutor">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Teléfono de Contacto</label>
+            <input type="text" name="owner_phone" class="form-control form-control-sm" placeholder="Ej: 555-123-4567">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Correo Electrónico</label>
+            <input type="email" name="owner_email" class="form-control form-control-sm" placeholder="cliente@ejemplo.com">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold">Dirección / Domicilio</label>
+            <input type="text" name="owner_address" class="form-control form-control-sm" placeholder="Calle, número, colonia">
+          </div>
+        </div>
+
+        <h5 class="fw-bold text-secondary mb-3"><i class="bi bi-clipboard2-pulse me-2"></i>Historial & Antecedentes Médicos</h5>
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Padecimientos Previos</label>
+            <textarea name="sick" class="form-control form-control-sm" rows="3" placeholder="Enfermedades previas o crónicas"></textarea>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Medicamentos Continuos</label>
+            <textarea name="medicaments" class="form-control form-control-sm" rows="3" placeholder="Tratamientos o fármacos habituales"></textarea>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold">Alergias Conocidas</label>
+            <textarea name="alergy" class="form-control form-control-sm" rows="3" placeholder="Alergia a alimentos, pulgas, fármacos..."></textarea>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <a href="{{ base_url }}/pacients" class="btn btn-sm btn-light">Cancelar</a>
+          <button type="submit" class="btn btn-sm btn-primary">
+            <i class="bi bi-save me-1"></i> Guardar Mascota
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
